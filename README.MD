@@ -4,7 +4,7 @@
 This directory contains 2 folders: clean and unclean.  
 The unclean folder stores the DICOM images that haven't been clean.
 If you want to test this project, save your test DICOM images to the unclean folder.  
-After running main.py, cleaned DICOM images will be stored in the clean folder.
+After running main.py, cleaned DICOM images will be stored in the clean folder. The clean folder will get created if it doesn't already exist.
 <br>
 <br>
 ### /src/main.py
