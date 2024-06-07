@@ -1,5 +1,4 @@
 from deid.dicom import get_files
-from deid.dicom import get_identifiers
 from deid.dicom.parser import DicomParser
 import os
 
