@@ -7,7 +7,7 @@ If you want to test this project, save your test DICOM images to the unclean fol
 After running main.py, cleaned DICOM images will be stored in the clean folder. The clean folder will get created if it doesn't already exist.
 <br>
 <br>
-### /src/main.py
+### /src/dicom-cleaner.py
 This is the file that does the job of processing DICOM images.
 <br>
 <br>

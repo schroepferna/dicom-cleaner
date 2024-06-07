@@ -7,7 +7,7 @@ import os
 # fetch a list of dicom files
 current_folder = os.path.basename(os.getcwd())
 root_path = os.getcwd()[:os.getcwd().index(current_folder) - 1]
-unclean_images_dir = os.path.abspath(os.path.join(root_path, "dicom-images/unclean/case1"))
+unclean_images_dir = os.path.abspath(os.path.join(root_path, "dicom-images/unclean/humans"))
 dicom_files = list(get_files(unclean_images_dir))
 
 # get the identifiers of the dicom files
@@ -29,4 +29,6 @@ ids = get_identifiers(dicom_files)
 # all other dicom files in the same folder usually contain similar fields, so just look at one of them
 for key in ids[dicom_files[0]]:
     field = ids[dicom_files[0]][key]
+    print(key)
+    print(field.element.name, "->", field.element.value)
     print(field.uid, "->", field.name)
