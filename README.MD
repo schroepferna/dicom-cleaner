@@ -21,6 +21,11 @@ This file contains the configuration for manipulating DICOM images.
 Currently, this file tells the DICOM parser to blank out patient name, patient birthdate, and patient ID.
 <br>
 <br>
+### /src/metadata-to-csv.py
+This file is for extracting the metadata in the headers of dicom files and write the headers to a csv file.
+
+<br>
+<br>
 ### About Reading DICOM Images
 To read the header information of a DICOM image, open the image using File Viewer Plus, and then click File Info.
 It should open up a panel on the left. The header information is under Image Metadata.  
