@@ -35,6 +35,7 @@ for file_path in dicom_file_paths:
     file_data = metadata[file_path]
 
     csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\', '')}
+    switch_patient_id = False
 
     for key in file_data:
         field = file_data[key]
@@ -42,22 +43,32 @@ for file_path in dicom_file_paths:
         field_value = str(field.element.value).strip()
         clean_field_name = field_name.strip().replace('[', '').replace(']', '').replace(' ', '').replace('"', '')
 
-        if 'Date' in clean_field_name:
+        if (('StudyDate' in clean_field_name or 'SeriesDate' in clean_field_name or 'AcquisitionDate' in clean_field_name
+             or 'ContentDate' in clean_field_name or 'PerformedProcedureStepStartDate' in clean_field_name)
+                and field_value):
             dt = datetime.strptime(field_value, "%Y%m%d")
             field_value = dt.strftime("%m/%d/%Y")
 
-        if 'Time' in clean_field_name:
+        if 'StudyTime' in clean_field_name or 'SeriesTime' in clean_field_name or 'AcquisitionTime' in clean_field_name or 'ContentTime' in clean_field_name:
             field_value = round(float(field_value))
 
         if 'BodyPartExamined' in clean_field_name:
             if field_value == 'LOW_EXM':
                 field_value = 'KNEE'
 
-        if 'ClinicalTrialSiteID' in field_name:
+        if 'ClinicalTrialSiteID' in clean_field_name:
             field_value = field_value.replace('0166', '')
 
         csv_columns.append(clean_field_name)
         csv_data_dict[clean_field_name] = field_value
+
+        if 'AccessionNumber' in clean_field_name and not field_value.startswith('0166'):
+            switch_patient_id = True
+
+    if switch_patient_id:
+        plate_id = csv_data_dict['AccessionNumber']
+        csv_data_dict['AccessionNumber'] = csv_data_dict['OtherPatientIDs']
+        csv_data_dict['PlateID'] = plate_id
 
     csv_data_list.append(csv_data_dict)
 
