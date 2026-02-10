@@ -9,11 +9,11 @@ from datetime import datetime
 # images are in bucket nda-oai-image-files
 
 # specify where to put the csv file
-csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12C1.csv')
+csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12C1_part_c.csv')
 
 # fetch a list of dicom files
 dicom_file_paths = []
-for root, dirs, files in os.walk('C:/dicom-csv/V12/12.C.1'):
+for root, dirs, files in os.walk('C:/dicom-csv/V12/12.C.1/part_c'):
     for file in files:
         file_path = os.path.abspath(os.path.join(root, file))
         # V12 images don't have .dcm or .dicom suffix
@@ -35,13 +35,13 @@ csv_data_list = []
 for file_path in dicom_file_paths:
     file_data = metadata[file_path]
 
-    csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\', '')}
+    csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\12.C.1\\part_c\\', '')}
     switch_patient_id = False
 
     for key in file_data:
         field = file_data[key]
         field_name = field.element.name
-        field_value = str(field.element.value).strip()
+        field_value = str(field.element.value).strip().strip('"')
         clean_field_name = field_name.strip().replace('[', '').replace(']', '').replace(' ', '').replace('"', '')
 
         if (('StudyDate' == clean_field_name or 'SeriesDate' == clean_field_name or 'AcquisitionDate' == clean_field_name
@@ -61,6 +61,8 @@ for file_path in dicom_file_paths:
             field_value = field_value.replace('0166', '')
 
         csv_columns.append(clean_field_name)
+        if len(str(field_value)) > 500:
+            field_value = field_value[:500]
         csv_data_dict[clean_field_name] = field_value
 
         if 'AccessionNumber' == clean_field_name and field_value and not field_value.startswith('0166'):
@@ -68,7 +70,7 @@ for file_path in dicom_file_paths:
 
     if switch_patient_id:
         plate_id = csv_data_dict['AccessionNumber']
-        csv_data_dict['AccessionNumber'] = csv_data_dict['OtherPatientIDs']
+        csv_data_dict['AccessionNumber'] = csv_data_dict['OtherPatientIDs'][4:]
         csv_data_dict['PlateID'] = plate_id
 
     csv_data_list.append(csv_data_dict)
