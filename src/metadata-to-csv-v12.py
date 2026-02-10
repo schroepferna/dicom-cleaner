@@ -6,6 +6,7 @@ import pathlib
 from datetime import datetime
 
 # this program get the metadata in dicom images and write the metadata to a cvs file
+# images are in bucket nda-oai-image-files
 
 # specify where to put the csv file
 csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12C1.csv')
@@ -43,26 +44,26 @@ for file_path in dicom_file_paths:
         field_value = str(field.element.value).strip()
         clean_field_name = field_name.strip().replace('[', '').replace(']', '').replace(' ', '').replace('"', '')
 
-        if (('StudyDate' in clean_field_name or 'SeriesDate' in clean_field_name or 'AcquisitionDate' in clean_field_name
-             or 'ContentDate' in clean_field_name or 'PerformedProcedureStepStartDate' in clean_field_name)
+        if (('StudyDate' == clean_field_name or 'SeriesDate' == clean_field_name or 'AcquisitionDate' == clean_field_name
+             or 'ContentDate' == clean_field_name or 'PerformedProcedureStepStartDate' == clean_field_name)
                 and field_value):
             dt = datetime.strptime(field_value, "%Y%m%d")
             field_value = dt.strftime("%m/%d/%Y")
 
-        if 'StudyTime' in clean_field_name or 'SeriesTime' in clean_field_name or 'AcquisitionTime' in clean_field_name or 'ContentTime' in clean_field_name:
+        if ('StudyTime' == clean_field_name or 'SeriesTime' == clean_field_name or 'AcquisitionTime' == clean_field_name or 'ContentTime' == clean_field_name) and field_value:
             field_value = round(float(field_value))
 
-        if 'BodyPartExamined' in clean_field_name:
+        if 'BodyPartExamined' == clean_field_name:
             if field_value == 'LOW_EXM':
                 field_value = 'KNEE'
 
-        if 'ClinicalTrialSiteID' in clean_field_name:
+        if 'ClinicalTrialSiteID' == clean_field_name and field_value:
             field_value = field_value.replace('0166', '')
 
         csv_columns.append(clean_field_name)
         csv_data_dict[clean_field_name] = field_value
 
-        if 'AccessionNumber' in clean_field_name and not field_value.startswith('0166'):
+        if 'AccessionNumber' == clean_field_name and field_value and not field_value.startswith('0166'):
             switch_patient_id = True
 
     if switch_patient_id:
