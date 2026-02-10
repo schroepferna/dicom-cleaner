@@ -3,66 +3,61 @@ import os
 import csv
 from dicom_parser import Image
 import pathlib
+from datetime import datetime
 
 # this program get the metadata in dicom images and write the metadata to a cvs file
 
 # specify where to put the csv file
-dicom_csv_dir = os.path.abspath('C:/dicom-csv')
-csv_file_path = os.path.abspath(dicom_csv_dir + '/OAI_V12_Images_12E1_Complete_Fields.csv')
+csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12C1.csv')
 
 # fetch a list of dicom files
 dicom_file_paths = []
-for root, dirs, files in os.walk('C:/Users/schroepferna/OAI/OAI_V12_Images_Extracted/12.E.1'):
+for root, dirs, files in os.walk('C:/dicom-csv/V12/12.C.1'):
     for file in files:
         file_path = os.path.abspath(os.path.join(root, file))
+        # V12 images don't have .dcm or .dicom suffix
         dicom_file_paths.append(file_path)
 
 # retrieve metadata information
-# it's a dictionary that has dicom file paths as keys
+# metadata is a dictionary, where has the file paths as keys, and has the metadata of each dicom file, which is also dictionaries, as values
 metadata = get_identifiers(dicom_file_paths)
 
-image_name_col = "ImageName"
-
 # csv_columns contains all the columns for all the dicom files
-csv_columns = [image_name_col]
+# first column is ImageName
+csv_columns = ['ImageName']
 
-# csv_data_list contains metadata in all dicom files
-# each element in this list is a dictionary that represents all the metadata in a dicom file
+# csv_data_list contains a list of extracted dicom data for all files
+# each element in this list is a dictionary
 csv_data_list = []
 
-# collection all the metadata into csv_data_list
+# iterate all file paths and collection all the metadata into csv_data_list
 for file_path in dicom_file_paths:
     file_data = metadata[file_path]
 
-    # the first column is the name of the image
-    # might need to change it to the s3 path of the image later
-    csv_data_dict = {image_name_col: file_path[51:]}
-    image = Image(file_path)
+    csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\', '')}
 
     for key in file_data:
         field = file_data[key]
-
         field_name = field.element.name
-        field_value = field.element.value
+        field_value = str(field.element.value).strip()
+        clean_field_name = field_name.strip().replace('[', '').replace(']', '').replace(' ', '').replace('"', '')
 
-        if field_name is not None:
-            field_name = str(field_name).replace(' ', '').replace('[', '').replace(']', '').replace("'s", '')
+        if 'Date' in clean_field_name:
+            dt = datetime.strptime(field_value, "%Y%m%d")
+            field_value = dt.strftime("%m/%d/%Y")
 
-        if 'CSA' in field_name or 'Date' in field_name:
-            field_value = image.header.get(field_name)
+        if 'Time' in clean_field_name:
+            field_value = round(float(field_value))
 
-        if field_name is not None and field_name != '' and field_value is not None and field_value != '':
-            if field_name not in csv_columns:
-                csv_columns.append(field_name)
+        if 'BodyPartExamined' in clean_field_name:
+            if field_value == 'LOW_EXM':
+                field_value = 'KNEE'
 
-            # limit each cell value to 500 characters in Excel
-            field_value = str(field_value)
-            if len(field_value) > 500:
-                field_value = field_value[:500]
+        if 'ClinicalTrialSiteID' in field_name:
+            field_value = field_value.replace('0166', '')
 
-            csv_data_dict[field_name] = field_value
-
-            #print('field name is ' + field_name + ', field value is ' + field_value)
+        csv_columns.append(clean_field_name)
+        csv_data_dict[clean_field_name] = field_value
 
     csv_data_list.append(csv_data_dict)
 
