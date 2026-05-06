@@ -9,11 +9,11 @@ from datetime import datetime
 # images are in bucket nda-oai-image-files
 
 # specify where to put the csv file
-csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12C1_part_c.csv')
+csv_file_path = os.path.abspath('C:/dicom-csv/scraped/OAI_V12_Images_12E1_part_c.csv')
 
 # fetch a list of dicom files
 dicom_file_paths = []
-for root, dirs, files in os.walk('C:/dicom-csv/V12/12.C.1/part_c'):
+for root, dirs, files in os.walk('C:/dicom-csv/V12/12.E.1/part_c'):
     for file in files:
         file_path = os.path.abspath(os.path.join(root, file))
         # V12 images don't have .dcm or .dicom suffix
@@ -35,7 +35,7 @@ csv_data_list = []
 for file_path in dicom_file_paths:
     file_data = metadata[file_path]
 
-    csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\12.C.1\\part_c\\', '')}
+    csv_data_dict = {'ImageName': file_path.replace('C:\\dicom-csv\\V12\\12.E.1\\part_c\\', '')}
     switch_patient_id = False
 
     for key in file_data:
